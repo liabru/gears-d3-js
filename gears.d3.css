@@ -1,0 +1,106 @@
+* { 
+    padding: 0; 
+    margin: 0; 
+}
+
+body { 
+    background: #222;
+    font-family: Georgia, Times, "Times New Roman", serif;
+    color: #aaa;
+}
+
+body.dragging {
+    cursor: -webkit-grabbing !important;
+}
+
+h1 {
+    color: #fff;
+    display: block;
+    margin: 0 0 1em 0;
+    font-weight: normal;
+    font-size: 30px;
+}
+
+p, ul li {
+    margin: 0 0 1em 0;
+    color: #bbb;
+    font-size: 12px;
+}
+
+ul {
+    list-style: square;
+}
+
+.nav {
+    margin: 0 0 2em 0;
+    font-size: 16px;
+}
+
+a, a:link, a:visited, a:active, a:hover {
+    color: #aaa;
+    text-decoration: none;
+    border-bottom: 1px solid #555;
+    padding: 0 0 2px 0;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 6%;
+}
+
+.nav-sep {
+    padding: 0 5px;
+}
+
+.gears-d3-canvas svg {
+    margin: 50px 0 0 0;
+    max-width: 800px;
+    max-height: 600px;
+}
+
+.gear path {
+    stroke: transparent;
+    cursor: move;
+}
+
+.gear.dragging path,
+.gear path:active {
+    opacity: 0.5;
+    cursor: -webkit-grabbing !important;
+}
+
+.gear:hover path {
+    opacity: 0.9;
+    stroke: #F6B25D;
+    stroke-width: 2px;
+}
+
+.gear .bulb-path .bulb-light {
+    opacity: 0;
+
+    transition: all 800ms ease-in-out;
+    -webkit-transition: all 800ms ease-in-out;
+    -moz-transition: all 800ms ease-in-out;
+    -o-transition: all 800ms ease-in-out;
+}
+
+.style-0 path {
+    fill: #556270;
+}
+
+.style-1 path {
+    fill: #4ECDC4;
+}
+
+.style-2 path {
+    fill: #C7F464;
+}
+
+.style-3 path {
+    fill: #FF6B6B;
+}
+
+.style-4 path {
+    fill: #C44D58;
+}
