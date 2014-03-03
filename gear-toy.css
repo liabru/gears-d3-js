@@ -13,7 +13,13 @@ body.dragging {
     cursor: -webkit-grabbing !important;
 }
 
-h1 {
+.container {
+    max-width: 1024px;
+    margin: 0 auto;
+    padding: 70px 5%;
+}
+
+.container h1 {
     color: #fff;
     display: block;
     margin: 0 0 1em 0;
@@ -21,13 +27,14 @@ h1 {
     font-size: 30px;
 }
 
-p, ul li {
+.container p, 
+.container ul li {
     margin: 0 0 1em 0;
     color: #bbb;
     font-size: 12px;
 }
 
-ul {
+.container ul {
     list-style: square;
 }
 
@@ -36,38 +43,43 @@ ul {
     font-size: 16px;
 }
 
-a, a:link, a:visited, a:active, a:hover {
+.container a, 
+.container a:link,
+.container a:visited, 
+.container a:active, 
+.container a:hover {
     color: #aaa;
     text-decoration: none;
     border-bottom: 1px solid #555;
     padding: 0 0 2px 0;
 }
 
-.container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 6%;
-}
-
 .nav-sep {
     padding: 0 5px;
 }
 
-.gears-d3-canvas svg {
-    margin: 50px 0 0 0;
-    max-width: 800px;
-    max-height: 600px;
+.ie .gears-d3-canvas {
+    /* ie fix :( */
+    height: 768px;
 }
 
-.gear path {
-    stroke: transparent;
-    cursor: move;
+.gears-d3-canvas svg {
+    border: 1px solid #333;
+    background: #252525;
+    margin: 30px 0 0 0;
+    overflow: hidden;
+    max-width: 1024px;
+    max-height: 768px;
 }
 
 .gear.dragging path,
 .gear path:active {
     opacity: 0.5;
     cursor: -webkit-grabbing !important;
+}
+
+.gear path {
+    cursor: move;
 }
 
 .gear:hover path {
@@ -83,6 +95,10 @@ a, a:link, a:visited, a:active, a:hover {
     -webkit-transition: all 800ms ease-in-out;
     -moz-transition: all 800ms ease-in-out;
     -o-transition: all 800ms ease-in-out;
+}
+
+.gear.powered path {
+    fill: #FFAE21 !important;
 }
 
 .style-0 path {

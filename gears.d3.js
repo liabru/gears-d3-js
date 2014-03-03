@@ -1,165 +1,66 @@
 /**
 * gears.d3.js
 * http://brm.io/gears-d3-js/
-*
-* A d3.js example for creating simulated gear animations with SVG.
-* 
 * License: MIT
 */
 
-(function($) {
-
-    $(function () {
-        $('.gears-d3-canvas').on('mousedown', function(e) {
-            e.originalEvent.preventDefault();
-        });
-
-        main();
-    });
-
-    var allGears = [],
-        changeInterval,
-        canvasWidth = 800,
-        canvasHeight = 600;
-
-    function main() {
-        var svg = d3.select('.gears-d3-canvas')
-            .append('svg')
-            .attr('viewBox', '0 0 ' + canvasWidth + ' ' + canvasHeight)
-            .attr('preserveAspectRatio', 'xMinYMin slice');
-
-        var xOffset = canvasWidth * 0.5,
-            yOffset = canvasHeight * 0.5,
-            holeRadius,
-            teeth,
-            radius,
-            factor,
-            newGear,
-            gearFactors = [32, 48, 48, 64, 64, 96, 112],
-            gearStyles = ['style-0', 'style-1', 'style-2', 'style-3', 'style-4'];
-
-        var dragBehaviour = Gear.dragBehaviour(allGears, svg);
-
-        dragBehaviour
-            .on("dragstart.i", function() {
-                clearTimeout(changeInterval);
-            })
-            .on("dragend.i", function() {
-                clearTimeout(changeInterval);
-            });
-
-        gearStyles = gearStyles.shuffle();
-
-        for (var i = 0; i < gearFactors.length * 2; i++) {
-            factor = gearFactors[i % gearFactors.length];
-            radius = factor / 2;
-            teeth = radius / 4;
-            holeRadius = factor > 96 ? radius * 0.5 : 20 * (radius / 96);
-
-            allGears.push(newGear = Gear.create(svg, { 
-                radius: radius, 
-                teeth: teeth, 
-                x: 0, 
-                y: 0, 
-                holeRadius: holeRadius 
-            }));
-
-            newGear.call(dragBehaviour);
-            newGear.classed(gearStyles[i % gearStyles.length], true);
-        }
-
-        allGears = allGears.shuffle();
-        Gear.randomArrange(allGears, xOffset, yOffset);
-        Gear.updateGears(allGears);
-
-        svg.selectAll('.gear')
-            .attr('transform', function(d){
-                return 'translate(' + [ d.x, d.y ] + ')';
-            });
-
-        changeInterval = setInterval(function() {
-            allGears = allGears.shuffle();
-            Gear.randomArrange(allGears, xOffset, yOffset);
-            Gear.updateGears(allGears);
-
-            svg.selectAll('.gear')
-                .each(function(d, i) {
-                    d3.select(this)
-                        .transition()
-                        .ease('elastic')
-                        .delay(i * 80 + Math.random() * 80)
-                        .duration(1500)
-                        .attr('transform', function(d) {
-                            return 'translate(' + [ d.x, d.y ] + ')';
-                        });
-                });
-        }, 4000);
-
-        d3.timer(function () {
-            svg.selectAll('.gear-path')
-                .attr('transform', function (d) {
-                    d.angle += d.speed;
-                    return 'rotate(' + d.angle * (180 / Math.PI) + ')';
-                });
-        });
-    }
-
-})(jQuery);
-
-
 var Gear = {
 
-    create: (function() {
-        var gearId = 0;
+    nextGearId: 0,
 
-        return function(svg, options) {
-            var datum = {
-                    teeth: Math.round(options.teeth) || 16,
-                    radius: options.radius || 200,
-                    x: options.x || 0,
-                    y: options.y || 0,
-                    speed: options.power || 0,
-                    power: options.power || 0,
-                    angle: options.angle || 0,
-                    addendum: options.addendum || 8,
-                    dedendum: options.dedendum || 3,
-                    thickness: options.thickness || 0.7,
-                    profileSlope: options.profileSlope || 0.5,
-                    holeRadius: options.holeRadius || 5,
-                    axisScale: options.axisScale || 1.5,
-                    dragEvent: 'dragend',
-                    id: gearId++
-                };
+    create: function(svg, options) {
+        var datum = {
+                teeth: Math.round(options.teeth) || 16,
+                radius: options.radius || 200,
+                x: options.x || 0,
+                y: options.y || 0,
+                speed: options.power || 0,
+                power: options.power || 0,
+                angle: options.angle || 0,
+                addendum: options.addendum || 8,
+                dedendum: options.dedendum || 3,
+                thickness: options.thickness || 0.7,
+                profileSlope: options.profileSlope || 0.5,
+                holeRadius: options.holeRadius || 5,
+                axisScale: options.axisScale || 1.5,
+                dragEvent: 'dragend',
+                id: Gear.nextGearId
+            };
 
-            datum.rootRadius = datum.radius - datum.dedendum;
-            datum.outsideRadius = datum.radius + datum.addendum;
-            datum.circularPitch = (1 - datum.thickness) * 2 * Math.PI / datum.teeth;
-            datum.pitchAngle = datum.thickness * 2 * Math.PI / datum.teeth;
-            datum.slopeAngle = datum.pitchAngle * datum.profileSlope * 0.5;
-            datum.addendumAngle = datum.pitchAngle * (1 - datum.profileSlope);
+        Gear.nextGearId += 1;
 
-            var gear = svg.append('g')
-                .attr('class', 'gear')
-                .attr('transform', 'translate(' + datum.x + ', ' + datum.y + ')')
-                .datum(datum);
+        datum.rootRadius = datum.radius - datum.dedendum;
+        datum.outsideRadius = datum.radius + datum.addendum;
+        datum.circularPitch = (1 - datum.thickness) * 2 * Math.PI / datum.teeth;
+        datum.pitchAngle = datum.thickness * 2 * Math.PI / datum.teeth;
+        datum.slopeAngle = datum.pitchAngle * datum.profileSlope * 0.5;
+        datum.addendumAngle = datum.pitchAngle * (1 - datum.profileSlope);
 
-            gear.on('mouseover', function() {
-                var $this = d3.select(this);
-                    $this.attr('transform', $this.attr('transform') + ' scale(1.06)');
-            });
+        var gear = svg.append('g')
+            .attr('class', 'gear')
+            .attr('transform', 'translate(' + datum.x + ', ' + datum.y + ')')
+            .datum(datum);
 
-            gear.on('mouseout', function() {
-                var $this = d3.select(this);
-                    $this.attr('transform', $this.attr('transform').replace(' scale(1.06)', ''));
-            });
+        gear.on('mouseover', function() {
+            var $this = d3.select(this);
+                $this.attr('transform', $this.attr('transform') + ' scale(1.06)');
+        });
 
-            gear.append('path')
-                .attr('class', 'gear-path')
-                .attr('d', Gear.path);
+        gear.on('mouseout', function() {
+            var $this = d3.select(this);
+                $this.attr('transform', $this.attr('transform').replace(' scale(1.06)', ''));
+        });
 
-            return gear;
-        };
-    })(),
+        gear.append('path')
+            .attr('class', 'gear-path')
+            .attr('d', Gear.path);
+
+        return gear;
+    },
+
+    setPower: function(gear, power) {
+        gear.datum().power = power;
+    },
 
     randomArrange: function(gears, xOffset, yOffset, angleMin, angleMax) {
         var xx = xOffset || 0,
@@ -179,14 +80,12 @@ var Gear = {
         angleMax = angleMax || 1.2;
 
         // first clone and shuffle all the gears
-        unplacedGears = gears.clone().shuffle();
-
-        // power up the first one
-        unplacedGears[0].datum().x = xx;
-        unplacedGears[0].datum().y = yy;
-        unplacedGears[0].datum().power = 0.01;
+        unplacedGears = Gear.Utility.arrayClone(gears);
+        Gear.Utility.arrayShuffle(unplacedGears);
 
         // place the first gear
+        unplacedGears[0].datum().x = xx;
+        unplacedGears[0].datum().y = yy;
         placedGears.push(unplacedGears[0]);
 
         // try place the gears randomly
@@ -248,9 +147,7 @@ var Gear = {
                     .on('drag', function (d, i) {
                         var collision = false,
                             oldX = d.x,
-                            oldY = d.y,
-                            svgWidth = parseInt(svg.style('width'), 10),
-                            svgHeight = parseInt(svg.style('height'), 10);
+                            oldY = d.y;
 
                         d.x = d3.event.x;
                         d.y = d3.event.y;
@@ -302,7 +199,7 @@ var Gear = {
             Math.abs(gearA.y - gearB.y) > threshold)
                 return false;
 
-        if (Utility.distanceSquared(gearA.x, gearA.y, gearB.x, gearB.y) < threshold * threshold)
+        if (Gear.Utility.distanceSquared(gearA.x, gearA.y, gearB.x, gearB.y) < threshold * threshold)
             return true;
 
         return false;
@@ -364,7 +261,7 @@ var Gear = {
                 continue;
 
             var nextGear = gearA.datum(),
-                connectedKeys = Utility.keys(nextGear.connected);
+                connectedKeys = Gear.Utility.keys(nextGear.connected);
 
             if (connectedKeys.length === 0)
                 continue;  
@@ -381,6 +278,9 @@ var Gear = {
 
             if (Math.abs(datum.power) > 0) {
                 Gear.propagateGears(datum, visited);
+                gears[i].classed('powered', true);
+            } else {
+                gears[i].classed('powered', false);
             }
         }
 
@@ -395,7 +295,7 @@ var Gear = {
     },
 
     mesh: function(gear, nextGear) {
-        var theta = Utility.angle(gear.x, gear.y, nextGear.x, nextGear.y),
+        var theta = Gear.Utility.angle(gear.x, gear.y, nextGear.x, nextGear.y),
             pitch = nextGear.circularPitch + nextGear.slopeAngle * 2 + nextGear.addendumAngle,
             radiusRatio = gear.radius / nextGear.radius;
         nextGear.angle = -(gear.angle % (2 * Math.PI)) * radiusRatio + theta + theta * radiusRatio + pitch * 0.5;
@@ -444,7 +344,7 @@ var Gear = {
     }
 };
 
-var Utility = {
+Gear.Utility = {
     keys: function(object) {
         if (Object.keys)
             return Object.keys(object);
@@ -471,26 +371,19 @@ var Utility = {
 
     sign: function(x) {
         return x < 0 ? -1 : 1;
+    },
+
+    arrayShuffle: function(array) {
+        for (var i = array.length - 1; i > 0; i--) {
+            var j = Math.floor(Math.random() * (i + 1));
+            var temp = array[i];
+            array[i] = array[j];
+            array[j] = temp;
+        }
+        return array;
+    },
+
+    arrayClone: function(array) {
+        return array.slice(0);
     }
-};
-
-Array.prototype.remove = function(from, to) {
-    var rest = this.slice((to || from) + 1 || this.length);
-    this.length = from < 0 ? this.length + from : from;
-    return this.push.apply(this, rest);
-};
-
-Array.prototype.shuffle = function() {
-    var array = this;
-    for (var i = array.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var temp = array[i];
-        array[i] = array[j];
-        array[j] = temp;
-    }
-    return array;
-};
-
-Array.prototype.clone = function() {
-    return this.slice(0);
 };
