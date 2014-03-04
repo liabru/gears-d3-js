@@ -22,7 +22,6 @@ var Gear = {
                 thickness: options.thickness || 0.7,
                 profileSlope: options.profileSlope || 0.5,
                 holeRadius: options.holeRadius || 5,
-                axisScale: options.axisScale || 1.5,
                 dragEvent: 'dragend',
                 id: Gear.nextGearId
             };
@@ -302,13 +301,13 @@ var Gear = {
     },
 
     path: function(options) {
-        var addendum = options.addendum || 10,
-            dedendum = options.dedendum || 0,
-            thickness = options.thickness || 0.7,
-            profileSlope = options.profileSlope || 0.5,
-            holeRadius = options.holeRadius || 5,
-            teeth = options.teeth || 16,
-            radius = (options.radius || 200) - addendum,
+        var addendum = options.addendum,
+            dedendum = options.dedendum,
+            thickness = options.thickness,
+            profileSlope = options.profileSlope,
+            holeRadius = options.holeRadius,
+            teeth = options.teeth,
+            radius = options.radius - addendum,
             rootRadius = radius - dedendum,
             outsideRadius = radius + addendum,
             circularPitch = (1 - thickness) * 2 * Math.PI / teeth,
